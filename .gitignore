@@ -1,0 +1,3 @@
+*/*.o
+erar-kernel/erar
+libbpf/build/
