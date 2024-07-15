@@ -1,3 +1,18 @@
 [submodule "libbpf"]
 	path = libbpf
 	url = https://github.com/libbpf/libbpf.git
+[submodule "mpich-erar/modules/libfabric"]
+	path = mpich-erar/modules/libfabric
+	url = https://github.com/pmodels/libfabric
+[submodule "mpich-erar/modules/hwloc"]
+	path = mpich-erar/modules/hwloc
+	url = https://github.com/pmodels/hwloc
+[submodule "mpich-erar/modules/ucx"]
+	path = mpich-erar/modules/ucx
+	url = https://github.com/pmodels/ucx
+[submodule "mpich-erar/modules/json-c"]
+	path = mpich-erar/modules/json-c
+	url = https://github.com/pmodels/json-c
+[submodule "mpich-erar/modules/yaksa"]
+	path = mpich-erar/modules/yaksa
+	url = https://github.com/pmodels/yaksa
