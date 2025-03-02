@@ -4,6 +4,10 @@
 #include <bpf/bpf_core_read.h>
 #include "erar.h"
 
+#ifdef EBPF_SIMD
+	extern int bpf_mm256add(int *arr1, u32 arr1__sz, const int *arr2, u32 arr2__sz) __ksym;
+#endif
+
 #define  ETH_P_IP 0x0800
 #define  ETH_P_ARP 0x0806
 #define  ETH_P_RARP 0x8035
@@ -416,21 +420,25 @@ int reduce_scatter_main(struct xdp_md *ctx) {
 	}
 
 	// bpf_printk("XDP RS %d: fetch package.", rank);
-	#pragma clang loop unroll(full)
-	for (int i = 0; i < MIN(block_count, MAX_BUF_SIZE); ++i) {
-		if ((void*)(payload + i * sizeof(int) + sizeof(int)) > data_end) {
-			// bpf_printk("rank %d: XDP break 1: %d", rank, data_end-(void*)payload);
-			break;
+	#ifdef EBPF_SIMD
+			bpf_mm256add(blocks_buff->buff[recv_block_id], MIN(payload_size, MAX_BUF_SIZE), payload, MIN(payload_size, MAX_BUF_SIZE));
+	#else
+		#pragma clang loop unroll(full)
+		for (int i = 0; i < MIN(block_count, MAX_BUF_SIZE); ++i) {
+			if ((void*)(payload + i * sizeof(int) + sizeof(int)) > data_end) {
+				// bpf_printk("rank %d: XDP break 1: %d", rank, data_end-(void*)payload);
+				break;
+			}
+			if (i >= MAX_BUF_SIZE) {
+				// bpf_printk("rank %d: XDP break 2", rank);
+				break;
+			}
+			// bpf_printk("XDP loop before: %d", *((int*)(payload + i * sizeof(int))));
+			blocks_buff->buff[recv_block_id][i] += *((int*)(payload + i * sizeof(int)));
+			*((int*)(payload + i * sizeof(int))) = (blocks_buff->buff[recv_block_id][i]);
+			// bpf_printk("XDP loop after: %d", *((int*)(payload + i * sizeof(int))));
 		}
-		if (i >= MAX_BUF_SIZE) {
-			// bpf_printk("rank %d: XDP break 2", rank);
-			break;
-		}
-		// bpf_printk("XDP loop before: %d", *((int*)(payload + i * sizeof(int))));
-		blocks_buff->buff[recv_block_id][i] += *((int*)(payload + i * sizeof(int)));
-		*((int*)(payload + i * sizeof(int))) = (blocks_buff->buff[recv_block_id][i]);
-		// bpf_printk("XDP loop after: %d", *((int*)(payload + i * sizeof(int))));
-	}
+	#endif
 
 	// rinfo->bitmap_rs |= (1ull << t);
 	// rinfo->bitmap_cnt += 1; // 不同packet对于info的更新可能会出现数据竞争

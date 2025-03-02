@@ -10,10 +10,14 @@ SRC_TARGET := $(SRCDIR)/$(target)
 DEV := lo
 
 DEBUG ?= 
-
+EBPF_SIMD ?=
 
 ifdef DEBUG
 	CFLAGS += -D DEBUG
+endif
+
+ifeq ($(EBPF_SIMD), 1)
+	CFLAGS += -D EBPF_SIMD
 endif
 
 .DEBFAULT: build

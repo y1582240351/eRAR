@@ -9,6 +9,8 @@ This repository mainly contains two parts:
 ## Building and Running
 Run `build.sh` to complie the code in `erar-kernel` and `mpich-erar`.
 
+> To use the eBPF SIMD function, please run and attach eBPF-SIMD in `eBPF-SIMD/`. Then run `build.sh 1` to complie the code.
+
 ### Attach eRAR to Kerenl
 We need to modify `erar.conf` to configure the cluster settings. The `erar.conf` follows the following format:
 ```

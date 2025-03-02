@@ -1,5 +1,7 @@
 #!/bin/bash
 
+EBPF_SIDM=${1:-0} 
+
 # build libbpf
 cd ./libbpf/src
 DESTDIR=../build make CFLAGS="-fPIC" install
@@ -13,7 +15,7 @@ cd ..
 
 # build erar-kernel
 cd ./erar-kernel
-make
+make EBPF_SIMD="$EBPF_SIMD"
 cd ..
 
 # build mpich-erar
